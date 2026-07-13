@@ -1,5 +1,6 @@
 桌面端运行界面
 <img width="2459" height="1612" alt="f1ca881015cc72892fdb3964cd4bc675" src="https://github.com/user-attachments/assets/f8284233-85ce-423e-a7ee-ef5e45b9a4de" />
+<img width="2433" height="1585" alt="image" src="https://github.com/user-attachments/assets/16d99e4b-1bf4-40f8-bf82-e20e31cee1ce" />
 
 
 # Hermes Agent — Desktop Development Environment
