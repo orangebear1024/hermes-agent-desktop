@@ -1,3 +1,7 @@
+桌面端运行界面
+<img width="2459" height="1612" alt="f1ca881015cc72892fdb3964cd4bc675" src="https://github.com/user-attachments/assets/f8284233-85ce-423e-a7ee-ef5e45b9a4de" />
+
+
 # Hermes Agent — Desktop Development Environment
 
 > **Course Project** — Full-stack development environment for the Hermes Agent desktop application, including the Electron shell, Python AI agent backend, TUI, and messaging gateway.
