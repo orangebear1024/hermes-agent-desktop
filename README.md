@@ -1,3 +1,370 @@
+# Hermes Agent — Desktop Development Environment
+
+> **Course Project** — Full-stack development environment for the Hermes Agent desktop application, including the Electron shell, Python AI agent backend, TUI, and messaging gateway.
+
+[![Electron](https://img.shields.io/badge/Electron-39.8.10-47848F?logo=electron)](https://electronjs.org)
+[![Python](https://img.shields.io/badge/Python-3.11.9-3776AB?logo=python)](https://python.org)
+[![Node.js](https://img.shields.io/badge/Node.js-24.16.0-339933?logo=node.js)](https://nodejs.org)
+[![React](https://img.shields.io/badge/React-19.2.5-61DAFB?logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0.3-3178C6?logo=typescript)](https://typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-8.1.0-646CFF?logo=vite)](https://vitejs.dev)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Running the App](#running-the-app)
+- [Building the Desktop App](#building-the-desktop-app)
+- [Configuration](#configuration)
+- [Usage Guide](#usage-guide)
+- [Development Notes](#development-notes)
+- [License](#license)
+
+---
+
+## Overview
+
+This repository contains a complete **Hermes Agent Desktop** development environment. Hermes Agent is an open-source, self-improving AI agent built by [Nous Research](https://nousresearch.com). It features a built-in learning loop, cross-platform desktop application, terminal UI, and messaging gateway supporting 20+ platforms.
+
+### What's Inside
+
+| Component | Description |
+|-----------|-------------|
+| **Electron Desktop App** | Native Windows/macOS/Linux GUI with React 19 renderer |
+| **Python AI Backend** | Agent core with conversation loop, tool orchestration, memory |
+| **TUI (Terminal UI)** | Ink/React-based terminal interface via `hermes --tui` |
+| **Messaging Gateway** | Multi-platform support (Telegram, Discord, Slack, etc.) |
+| **Plugin System** | Extensible memory providers, model providers, tools |
+
+---
+
+## Features
+
+- **Electron Desktop GUI** — Streaming chat, file browser, side-by-side previews, voice I/O
+- **AI Agent Core** — Tool-calling loop, subagent delegation, skill creation/improvement
+- **80+ Built-in Tools** — Terminal, file operations, web search, browser automation, MCP
+- **Multi-Provider Support** — OpenAI, Anthropic, OpenRouter, SiliconFlow, custom endpoints
+- **Persistent Memory** — Cross-session learning with pluggable memory backends
+- **Cron Scheduler** — Natural-language scheduled tasks with multi-platform delivery
+- **Plugin Architecture** — Custom tools, model providers, memory backends via plugins
+- **Portable Runtime** — Self-contained `workspace/` with `run.ps1` / `run.sh` launchers
+
+---
+
+## Tech Stack
+
+### Frontend (Desktop App)
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Electron | 39.8.10 | Desktop shell |
+| React | 19.2.5 | UI framework |
+| TypeScript | 6.0.3 | Type-safe development |
+| Vite | 8.1.0 | Build tooling |
+| Tailwind CSS | 4.2.4 | Styling |
+| nanostores | 1.3.0 | State management |
+| xterm.js | 6.0.0 | Embedded terminal |
+| node-pty | 1.1.0 | PTY backend |
+
+### Backend (Python Agent)
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Python | 3.11.9 | Runtime |
+| OpenAI SDK | 2.24.0 | LLM API client |
+| HTTPX | 0.28.1 | HTTP client |
+| Pydantic | 2.13.4 | Data validation |
+| FastAPI + Uvicorn | 0.133.1 | API server |
+| Rich | 14.3.3 | Terminal UI |
+| SQLite (FTS5) | — | Session storage |
+
+### DevOps & Tooling
+| Technology | Purpose |
+|------------|---------|
+| uv | Python package manager |
+| npm workspaces | Monorepo package management |
+| esbuild | Electron main/preload bundling |
+| electron-builder | App packaging & distribution |
+| Git | Version control |
+
+---
+
+## Project Structure
+
+```
+hermes-agent/
+├── apps/                        # Frontend applications (npm workspaces)
+│   ├── desktop/                 # Electron desktop app
+│   │   ├── src/                 # React renderer source
+│   │   ├── electron/            # Electron main process + preload
+│   │   ├── scripts/             # Build tooling (.mjs)
+│   │   ├── assets/              # App icons
+│   │   └── public/              # Static assets
+│   └── shared/                  # Framework-agnostic JSON-RPC client
+│
+├── agent/                       # AI agent core subsystems
+│   ├── conversation_loop.py     # Core conversation loop
+│   ├── prompt_builder.py        # System prompt construction
+│   ├── memory_manager.py        # Memory management
+│   └── ...                      # ~90 modules
+│
+├── tools/                       # Tool implementations (80+ files)
+│   ├── registry.py              # Auto-discovery tool registry
+│   └── environments/            # Terminal backends
+│
+├── gateway/                     # Messaging gateway
+│   ├── run.py                   # Gateway main loop
+│   └── platforms/               # 20+ platform adapters
+│
+├── skills/                      # Built-in skills (20 categories)
+├── plugins/                     # Plugin system (memory, providers, tools)
+├── cron/                        # Scheduled job system
+├── hermes_cli/                  # CLI subsystem
+├── ui-tui/ + tui_gateway/       # Terminal UI (Ink + Python)
+│
+├── workspace/                   # Portable HERMES_HOME runtime directory
+│   ├── config.yaml              # Runtime configuration
+│   ├── .env.example             # Environment template (no real keys)
+│   ├── SOUL.md                  # Agent persona
+│   ├── memories/                # Long-term memory
+│   └── skills/                  # User-created skills
+│
+├── run.ps1 / run.sh             # Portable launchers
+├── hermes                       # Python entry point
+├── run_agent.py                 # AIAgent class (~277KB)
+├── pyproject.toml               # Python project metadata
+└── package.json                 # npm workspace root
+```
+
+---
+
+## Prerequisites
+
+### Required
+| Tool | Minimum Version | Check |
+|------|----------------|-------|
+| **Node.js** | ≥ 22.12.0 | `node --version` |
+| **npm** | ≥ 10.x | `npm --version` |
+| **Python** | ≥ 3.11, < 3.14 | `python --version` |
+| **uv** | latest | `uv --version` |
+| **Git** | any | `git --version` |
+| **PowerShell** | 5.1+ (Windows) | `$PSVersionTable.PSVersion` |
+
+### Optional
+| Tool | Purpose |
+|------|---------|
+| ripgrep (rg) | Fast file search |
+| ffmpeg | Voice/audio features |
+| Docker | Container terminal backend |
+
+---
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/hermes-agent-desktop.git
+cd hermes-agent-desktop
+```
+
+### 2. Install Python Dependencies
+
+```bash
+# Create virtual environment
+uv venv .venv --python 3.11
+
+# Activate (Windows PowerShell)
+.\.venv\Scripts\Activate.ps1
+
+# Install all Python dependencies
+uv pip install -e ".[all]"
+```
+
+### 3. Install Node.js Dependencies
+
+```bash
+# From repository root (installs all workspaces)
+npm ci
+```
+
+### 4. Configure API Keys
+
+```bash
+# Copy environment template
+cp workspace\.env.example workspace\.env
+
+# Edit workspace\.env with your API keys
+# Example for SiliconFlow:
+#   OPENAI_API_KEY=sk-your-key-here
+#   OPENAI_BASE_URL=https://api.siliconflow.cn/v1
+
+# Edit workspace\config.yaml to set your model provider
+```
+
+---
+
+## Running the App
+
+### Desktop GUI (Electron)
+
+```bash
+cd apps/desktop
+HERMES_DESKTOP_HERMES_ROOT="D:\path\to\project" npx electron .
+```
+
+Or using the build:
+
+```bash
+cd apps/desktop
+npm run build
+npm start
+```
+
+### TUI (Terminal UI)
+
+```bash
+# Windows PowerShell
+.\run.ps1 --tui
+
+# Linux/macOS/WSL
+./run.sh --tui
+```
+
+### Interactive CLI
+
+```bash
+.\run.ps1              # Windows
+./run.sh               # Linux/macOS/WSL
+```
+
+### Messaging Gateway
+
+```bash
+.\run.ps1 gateway start
+```
+
+---
+
+## Building the Desktop App
+
+### Development Build
+
+```bash
+cd apps/desktop
+npm run build
+```
+
+Output goes to `apps/desktop/dist/`:
+- `electron-main.cjs` — Main process bundle (CJS)
+- `electron-preload.js` — Preload script (CJS)
+- `index.html` + `assets/` — Renderer bundle (Vite)
+
+### Production Packaging
+
+```bash
+cd apps/desktop
+npm run pack          # Unpacked directory build
+npm run dist:win      # Windows NSIS + MSI installer
+npm run dist:mac      # macOS DMG + zip
+npm run dist:linux    # Linux AppImage + deb + rpm
+```
+
+> **Windows Note:** The desktop app uses CJS format for the Electron main process to ensure `require('electron')` resolves correctly. See `apps/desktop/scripts/bundle-electron-main.mjs`.
+
+---
+
+## Configuration
+
+### config.yaml (workspace/config.yaml)
+
+```yaml
+model:
+  provider: custom              # or openrouter, openai, anthropic, etc.
+  default: Qwen/Qwen3-32B       # Model identifier
+  base_url: https://api.siliconflow.cn/v1
+  api_mode: chat_completions    # OpenAI-compatible protocol
+_config_version: 33
+```
+
+### .env (workspace/.env — NEVER COMMIT)
+
+```ini
+OPENAI_API_KEY=sk-xxx           # Your API key
+OPENAI_BASE_URL=https://api.siliconflow.cn/v1
+```
+
+### Supported Providers
+
+- **OpenRouter** — Multi-model router
+- **OpenAI** — Direct OpenAI API
+- **Anthropic** — Native Anthropic API
+- **SiliconFlow** (硅基流动) — Chinese AI inference cloud
+- **MiniMax** — Chinese LLM provider
+- **Custom** — Any OpenAI-compatible endpoint
+
+---
+
+## Usage Guide
+
+### Slash Commands
+
+| Command | Action |
+|---------|--------|
+| `/help` | Show all available commands |
+| `/model` | Switch AI model/provider |
+| `/new` | Start a fresh conversation |
+| `/skills` | Browse available skills |
+| `/compress` | Compress conversation context |
+| `/usage` | Check token usage |
+| `/retry` | Retry the last turn |
+| `/undo` | Undo the last turn |
+
+### Tools Available
+
+Core tools include: `terminal`, `read_file`, `write_file`, `web_search`, `browser_navigate`, `delegate_task`, `memory`, `skills`, `todo`, `vision_analyze`, `tts`, `code_execution`, and many more.
+
+---
+
+## Development Notes
+
+### Desktop App Architecture
+
+```
+Electron Main Process (main.ts)
+  └─ spawn("hermes", ["serve", "--host", "127.0.0.1", "--port", "0"])
+       └─ Python tui_gateway (JSON-RPC over WebSocket)
+            └─ AIAgent + tools + sessions
+```
+
+- **React Renderer** → `@hermes/shared` → WebSocket JSON-RPC → Python Backend
+- **Slash Commands** → Client-side curation → Backend `slash.exec` → `_SlashWorker`
+- **Preload** → `contextBridge.exposeInMainWorld('hermesDesktop', {...})`
+
+### Key Build Scripts
+
+| Script | File | Purpose |
+|--------|------|---------|
+| `bundle-electron-main.mjs` | `scripts/` | esbuild: main.ts → electron-main.cjs |
+| `stage-native-deps.mjs` | `scripts/` | Copy node-pty native binaries |
+| `write-build-stamp.mjs` | `scripts/` | Git commit stamp for bootstrap |
+| `assert-dist-built.mjs` | `scripts/` | Verify dist/ completeness |
+
+---
+
+## License
+
+This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
+
+Built by [Nous Research](https://nousresearch.com).
+
+---
+
 <p align="center">
   <img src="assets/banner.png" alt="Hermes Agent" width="100%">
 </p>
