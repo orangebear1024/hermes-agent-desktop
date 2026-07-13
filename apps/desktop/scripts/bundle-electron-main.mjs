@@ -4,7 +4,7 @@
 // node_modules/ or tsx at runtime.
 //
 // Output:
-//   dist/electron-main.mjs    (MJS bundle — entry point for packaged app)
+//   dist/electron-main.cjs   (CJS bundle — entry point for packaged app)
 //   dist/electron-preload.js (CJS bundle — loaded via BrowserWindow preload)
 //
 // `electron` and `node-pty` are external (provided by the runtime / staged
@@ -20,7 +20,7 @@ const distDir = resolve(root, 'dist')
 mkdirSync(distDir, { recursive: true })
 
 const mainEntry = resolve(root, 'electron/main.ts')
-const mainOut = resolve(distDir, 'electron-main.mjs')
+const mainOut = resolve(distDir, 'electron-main.cjs')
 const preloadEntry = resolve(root, 'electron/preload.ts')
 const preloadOut = resolve(distDir, 'electron-preload.js')
 
@@ -33,18 +33,16 @@ const define = isDev
   ? {}
   : { 'process.env.HERMES_DESKTOP_IS_PACKAGED': JSON.stringify(true) }
 
-// Bundle main.ts → dist/electron-main.mjs
+// Bundle main.ts → dist/electron-main.cjs (CJS — ESM import of 'electron'
+// built-in doesn't resolve named exports correctly in Electron 40).
 await build({
   entryPoints: [mainEntry],
   bundle: true,
   platform: 'node',
-  format: 'esm',
+  format: 'cjs',
   target: 'node20',
   outfile: mainOut,
   external,
-  banner: {
-    js: "import { createRequire } from 'module'; const require = createRequire(import.meta.url);",
-  },
   define,
   logLevel: 'info',
 })
